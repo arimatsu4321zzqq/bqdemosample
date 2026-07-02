@@ -1,0 +1,65 @@
+{
+  "displayName": "日本 検索トレンド分析エージェント (bqdemosample)",
+  "description": "Google トレンド(日本)の週次・都道府県別データを自然言語で分析するデータエージェント。人気ワード(jp_top_terms)と急上昇ワード(jp_top_rising_terms)の2テーブルを対象に、トレンド推移・地域比較・話題ワード抽出に回答する。\n\n質問例:\n1. 直近の週で東京の人気検索ワードTop10を教えて\n2. 「栗きんとん」の全国スコア推移を月別に見せて\n3. 直近週で最も急上昇したワードを都道府県別に教えて",
+  "labels": {
+    "app": "bqdemosample",
+    "theme": "google-trends",
+    "country": "jp",
+    "env": "demo"
+  },
+  "dataAnalyticsAgent": {
+    "publishedContext": {
+      "systemInstruction": "system_instruction: >-\n  あなたは日本の検索トレンドを分析するデータアナリストです。Google トレンド由来の\n  週次・都道府県別データを用い、日本語で分かりやすく回答します。回答には表やグラフを\n  積極的に用い、要点を日本語で簡潔に補足してください。\n\n  基本ルール:\n  1. 「人気・定番」は jp_top_terms、「急上昇・話題・バズ」は jp_top_rising_terms を使う。\n  2. データは日本(country_code='JP')のみ。国の絞り込みは不要。\n  3. 都道府県は region_name の英語表記で指定する。ユーザーが日本語県名で聞いたら英語名に変換する\n     （用語集参照。東京だけは 'Tokyo'、それ以外は '<英名> Prefecture'）。\n  4. 「最新」「直近」は各テーブルの MAX(week) を基準にする。\n  5. 全国集計は都道府県をまたぐため term・week 単位で AVG(score) や MAX(percent_gain) を取る。\n  6. 時系列は week 昇順で並べる。rank は同一週・地域内で同順位(タイ)が存在しうる点に注意。\n\ntables:\n  - table: ci-ss4-develop.demo_google_trends.jp_top_terms\n    description: 日本の週次・都道府県別「人気」検索ワードランキング。定番・よく検索される語の把握に使う。\n    synonyms:\n      - 人気ワード\n      - 人気検索ワード\n      - トップワード\n    fields:\n      - field: region_name\n        description: 都道府県名（英語表記）。東京のみ 'Tokyo'、他は '<英名> Prefecture'。\n        synonyms:\n          - 都道府県\n          - 県\n          - 地域\n        sample_values:\n          - Tokyo\n          - Aichi Prefecture\n          - Akita Prefecture\n          - Aomori Prefecture\n          - Chiba Prefecture\n          - Ehime Prefecture\n          - Fukui Prefecture\n          - Fukuoka Prefecture\n          - Fukushima Prefecture\n          - Gifu Prefecture\n          - Gunma Prefecture\n          - Hiroshima Prefecture\n          - Hokkaido Prefecture\n          - Hyogo Prefecture\n          - Ibaraki Prefecture\n          - Ishikawa Prefecture\n          - Iwate Prefecture\n          - Kagawa Prefecture\n          - Kagoshima Prefecture\n          - Kanagawa Prefecture\n          - Kochi Prefecture\n          - Kumamoto Prefecture\n          - Kyoto Prefecture\n          - Mie Prefecture\n          - Miyagi Prefecture\n          - Miyazaki Prefecture\n          - Nagano Prefecture\n          - Nagasaki Prefecture\n          - Nara Prefecture\n          - Niigata Prefecture\n          - Oita Prefecture\n          - Okayama Prefecture\n          - Okinawa Prefecture\n          - Osaka Prefecture\n          - Saga Prefecture\n          - Saitama Prefecture\n          - Shiga Prefecture\n          - Shimane Prefecture\n          - Shizuoka Prefecture\n          - Tochigi Prefecture\n          - Tokushima Prefecture\n          - Tottori Prefecture\n          - Toyama Prefecture\n          - Wakayama Prefecture\n          - Yamagata Prefecture\n          - Yamaguchi Prefecture\n          - Yamanashi Prefecture\n      - field: term\n        description: 検索ワード（日本語）。\n        synonyms:\n          - 検索ワード\n          - キーワード\n          - ワード\n        sample_values:\n          - 栗きんとん\n          - 田中みな実\n          - 橋本愛\n      - field: week\n        description: 対象週（週の開始日）。時系列の時間軸。\n        synonyms:\n          - 週\n          - 対象週\n      - field: rank\n        description: その週・都道府県内での人気順位（1が最上位、通常1〜25）。タイあり。\n        synonyms:\n          - 順位\n          - ランキング\n      - field: score\n        description: 人気スコア（相対値0〜100、系列内最大を100）。\n        synonyms:\n          - スコア\n          - 人気度\n          - 検索インタレスト\n  - table: ci-ss4-develop.demo_google_trends.jp_top_rising_terms\n    description: 日本の週次・都道府県別「急上昇」検索ワード。話題性・バズの把握に使う。\n    synonyms:\n      - 急上昇ワード\n      - 話題のワード\n      - バズワード\n    fields:\n      - field: percent_gain\n        description: 上昇率(%)。伸びの大きさ＝話題性の主指標。急上昇分析ではこの列で並べ替える。\n        synonyms:\n          - 上昇率\n          - 伸び率\n          - 話題性\n      - field: term\n        description: 急上昇した検索ワード（日本語）。\n      - field: score\n        description: 人気スコア（相対値0〜100）。急上昇系列では欠損の場合あり。\n\nglossaries:\n  - term: 人気（定番）\n    description: よく検索される定番ワード。jp_top_terms を参照し score / rank で評価する。\n    synonyms:\n      - 定番\n      - よく検索される\n      - 人気\n  - term: 急上昇（話題・バズ）\n    description: 短期間に検索が伸びたワード。jp_top_rising_terms を参照し percent_gain で評価する。\n    synonyms:\n      - 話題\n      - バズ\n      - 急上昇\n      - 伸びている\n      - トレンド\n  - term: スコア\n    description: score 列。0〜100の相対的な検索インタレスト。系列内の最大を100とする。\n  - term: 上昇率\n    description: percent_gain 列。急上昇の度合い(%)。jp_top_rising_terms のみに存在。\n  - term: 東京\n    description: region_name では 'Tokyo'（47都道府県で唯一 'Prefecture' が付かない）。\n  - term: 都道府県名の対応\n    description: 東京以外は「<英名> Prefecture」。例 大阪='Osaka Prefecture'、京都='Kyoto Prefecture'、北海道='Hokkaido Prefecture'、愛知='Aichi Prefecture'、福岡='Fukuoka Prefecture'。\n",
+      "exampleQueries": [
+        {
+          "naturalLanguageQuestion": "直近の週で東京の人気検索ワードTop10を教えて",
+          "sqlQuery": "SELECT term, rank, score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE region_name = 'Tokyo'\n  AND week = (SELECT MAX(week) FROM `ci-ss4-develop.demo_google_trends.jp_top_terms`)\nORDER BY rank\nLIMIT 10;"
+        },
+        {
+          "naturalLanguageQuestion": "直近の週に全国で人気の高かった検索ワードTop10（都道府県横断の平均スコア順）",
+          "sqlQuery": "SELECT term, AVG(score) AS avg_score, COUNT(DISTINCT region_name) AS regions\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE week = (SELECT MAX(week) FROM `ci-ss4-develop.demo_google_trends.jp_top_terms`)\nGROUP BY term\nORDER BY avg_score DESC, regions DESC\nLIMIT 10;"
+        },
+        {
+          "naturalLanguageQuestion": "「栗きんとん」の全国平均スコアの週次推移を見せて",
+          "sqlQuery": "SELECT week, AVG(score) AS avg_score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE term = '栗きんとん'\nGROUP BY week\nORDER BY week;"
+        },
+        {
+          "naturalLanguageQuestion": "「栗きんとん」の全国平均スコアの月次推移を見せて",
+          "sqlQuery": "SELECT DATE_TRUNC(week, MONTH) AS month, AVG(score) AS avg_score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE term = '栗きんとん'\nGROUP BY month\nORDER BY month;"
+        },
+        {
+          "naturalLanguageQuestion": "直近の週で「栗きんとん」を最も検索している都道府県Top5",
+          "sqlQuery": "SELECT region_name, score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE term = '栗きんとん'\n  AND week = (SELECT MAX(week) FROM `ci-ss4-develop.demo_google_trends.jp_top_terms`)\nORDER BY score DESC\nLIMIT 5;"
+        },
+        {
+          "naturalLanguageQuestion": "直近週で最も急上昇したワードを上昇率順に10件",
+          "sqlQuery": "SELECT region_name, term, percent_gain, rank\nFROM `ci-ss4-develop.demo_google_trends.jp_top_rising_terms`\nWHERE week = (SELECT MAX(week) FROM `ci-ss4-develop.demo_google_trends.jp_top_rising_terms`)\nORDER BY percent_gain DESC\nLIMIT 10;"
+        },
+        {
+          "naturalLanguageQuestion": "直近の週の東京と大阪の人気ワードTop5を比較して",
+          "sqlQuery": "SELECT region_name, term, rank, score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE region_name IN ('Tokyo', 'Osaka Prefecture')\n  AND week = (SELECT MAX(week) FROM `ci-ss4-develop.demo_google_trends.jp_top_terms`)\n  AND rank <= 5\nORDER BY region_name, rank;"
+        },
+        {
+          "naturalLanguageQuestion": "「栗きんとん」と「田中みな実」の全国平均スコアの週次推移を比較して",
+          "sqlQuery": "SELECT week, term, AVG(score) AS avg_score\nFROM `ci-ss4-develop.demo_google_trends.jp_top_terms`\nWHERE term IN ('栗きんとん', '田中みな実')\nGROUP BY week, term\nORDER BY week, term;"
+        }
+      ],
+      "datasourceReferences": {
+        "bq": {
+          "tableReferences": [
+            {
+              "projectId": "ci-ss4-develop",
+              "datasetId": "demo_google_trends",
+              "tableId": "jp_top_terms"
+            },
+            {
+              "projectId": "ci-ss4-develop",
+              "datasetId": "demo_google_trends",
+              "tableId": "jp_top_rising_terms"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
