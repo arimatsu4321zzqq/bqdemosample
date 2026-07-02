@@ -20,13 +20,13 @@ AGENT_ID=jp_trends_demo
 curl -X POST \
   "https://geminidataanalytics.googleapis.com/v1beta/projects/$PROJECT/locations/global/dataAgents?data_agent_id=$AGENT_ID" \
   -H "Authorization: Bearer $TOKEN" -H "x-goog-user-project: $PROJECT" \
-  -H "Content-Type: application/json" -d @agent/jp_trends_agent.json
+  -H "Content-Type: application/json" -d @jp_trends_agent.json
 
 # 更新（PATCH。jp_trends_agent.json を編集後）
 curl -X PATCH \
   "https://geminidataanalytics.googleapis.com/v1beta/projects/$PROJECT/locations/global/dataAgents/$AGENT_ID?update_mask=data_analytics_agent" \
   -H "Authorization: Bearer $TOKEN" -H "x-goog-user-project: $PROJECT" \
-  -H "Content-Type: application/json" -d @agent/jp_trends_agent.json
+  -H "Content-Type: application/json" -d @jp_trends_agent.json
 ```
 
 ## 質問する（ステートレス chat）

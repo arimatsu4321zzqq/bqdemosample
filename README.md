@@ -39,6 +39,25 @@
 > カスタムUIを作り込む場合は既存スタック（ADK / FastAPI / React）と一致させられる。
 > 第一弾はまず純正データエージェント＋少数の固定レポートで「動くデモ」を最短で出す。
 
+## デモ一覧（`demos/` 配下・1テーマ1フォルダで自己完結）
+
+採用したデモだけフォルダ化する。各フォルダは `README.md / setup.md / sql/ / agent/ /
+data-dictionary.md / looker-layout.md` を持ち、そのデモ単体で再現・受け渡しできる。
+Looker Studio 共通ノウハウは [`docs/looker-common.md`](docs/looker-common.md)。
+お客様アカウントへの会話分析エージェント共有（IAM）手順は [`docs/access-sharing-setup.md`](docs/access-sharing-setup.md)。
+
+| # | デモ | テーマ | 元データ | ステータス |
+|---|---|---|---|---|
+| ① | [google-trends](demos/google-trends/) | 検索トレンド（地域×時系列） | `google_trends` | ✅ 構築済み（動作検証済み） |
+
+### 追加候補（採用保留）
+
+第2・第3デモの候補は [`demos/candidate-datasets.md`](demos/candidate-datasets.md) に辞書・レイアウト案を退避。
+採用が決まったら google-trends を雛形に `demos/<名前>/` を作成する。
+
+- `thelook_ecommerce` — EC売上BI（売上・顧客・商品）
+- `austin_bikeshare` — 人流・移動（ドコモ親和）
+
 ## データ（第一弾は BQ public のみ・ロード作業なし）
 
 候補（公式チュートリアル実績あり / 即利用可）:

@@ -8,11 +8,14 @@
 想定環境: `gcloud` / `bq` インストール済み、プロジェクト `ci-ss4-develop`（課金有効）。
 別プロジェクトで作る場合は本書中の `ci-ss4-develop` を読み替える。
 
-関連ファイル:
-- テーブル作成SQL: [`../sql/create_google_trends_demo.sql`](../sql/create_google_trends_demo.sql)
-- エージェント定義: [`../agent/jp_trends_agent.json`](../agent/jp_trends_agent.json)（[`build_payload.py`](../agent/build_payload.py) で生成）
-- エージェント操作コマンド集: [`../agent/README.md`](../agent/README.md)
-- データ辞書: [`data-dictionary.md`](./data-dictionary.md)
+関連ファイル（すべて本フォルダ `demos/google-trends/` 配下）:
+- テーブル作成SQL: [`sql/create_google_trends_demo.sql`](./sql/create_google_trends_demo.sql)
+- ダッシュボード集計SQL: [`sql/create_dashboard_tables.sql`](./sql/create_dashboard_tables.sql)
+- エージェント定義: [`agent/jp_trends_agent.json`](./agent/jp_trends_agent.json)（[`agent/build_payload.py`](./agent/build_payload.py) で生成）
+- エージェント操作コマンド集: [`agent/README.md`](./agent/README.md)
+- データ辞書: [`data-dictionary.md`](./data-dictionary.md) / Looker案: [`looker-layout.md`](./looker-layout.md)
+
+> 以下のコマンドはリポジトリのルートから実行する前提でパスを記載している。
 
 ---
 
@@ -66,7 +69,7 @@ bq --location=US mk --dataset \
 `sql/create_google_trends_demo.sql` を実行するだけ。カラム説明も `OPTIONS(description=...)` で内包済み。
 
 ```bash
-bq query --use_legacy_sql=false --location=US < sql/create_google_trends_demo.sql
+bq query --use_legacy_sql=false --location=US < demos/google-trends/sql/create_google_trends_demo.sql
 ```
 
 作られるもの:
@@ -101,8 +104,8 @@ gcloud に専用コマンドが無いので **REST API** で作る。ロケー�
 
 ### 4-1. 定義ファイルを用意
 
-`agent/jp_trends_agent.json` をそのまま使う。編集して作り直す場合は
-`python3 agent/build_payload.py` で再生成する（用語集・県名・検証済みクエリを一元管理）。
+`demos/google-trends/agent/jp_trends_agent.json` をそのまま使う。編集して作り直す場合は
+`python3 demos/google-trends/agent/build_payload.py` で再生成する（用語集・県名・検証済みクエリを一元管理）。
 
 定義に含まれるもの:
 - **datasourceReferences**: 上記2テーブルへの紐付け
@@ -121,7 +124,7 @@ AGENT_ID=jp_trends_demo
 curl -X POST \
   "https://geminidataanalytics.googleapis.com/v1beta/projects/$PROJECT/locations/global/dataAgents?data_agent_id=$AGENT_ID" \
   -H "Authorization: Bearer $TOKEN" -H "x-goog-user-project: $PROJECT" \
-  -H "Content-Type: application/json" -d @agent/jp_trends_agent.json
+  -H "Content-Type: application/json" -d @demos/google-trends/agent/jp_trends_agent.json
 ```
 
 > レスポンスは長時間オペレーション（LRO）。`done:true` になれば作成完了（通常数秒）。
@@ -134,7 +137,7 @@ curl -X POST \
 curl -X PATCH \
   "https://geminidataanalytics.googleapis.com/v1beta/projects/$PROJECT/locations/global/dataAgents/$AGENT_ID?update_mask=data_analytics_agent,labels" \
   -H "Authorization: Bearer $TOKEN" -H "x-goog-user-project: $PROJECT" \
-  -H "Content-Type: application/json" -d @agent/jp_trends_agent.json
+  -H "Content-Type: application/json" -d @demos/google-trends/agent/jp_trends_agent.json
 ```
 
 ### 4-4. 確認
