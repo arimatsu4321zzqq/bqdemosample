@@ -1,6 +1,6 @@
 # P1 概況 ページ作成手順
 
-前提: [`looker-setup-common.md`](./looker-setup-common.md)（データソース3本追加・型/既定集計・テーマ・ナビ・レポートレベル期間コントロールは設定済み）。機能詳細は [`looker-studio-capabilities.md`](../../docs/looker-studio-capabilities.md) を参照。本ページはデータソース `週×ワード(全国)`（= `dash_jp_terms_weekly`）と `都道府県×ワード(最新)`（= `dash_jp_region_latest`）を使う。
+前提: [`looker-setup-common.md`](./looker-setup-common.md)（データソース3本追加・型/既定集計・テーマ・ナビ・レポートレベル期間コントロールは設定済み）。機能詳細は [`looker-studio-capabilities.md`](../../../docs/looker-studio-capabilities.md) を参照。本ページはデータソース `週×ワード(全国)`（= `dash_jp_terms_weekly`）と `都道府県×ワード(最新)`（= `dash_jp_region_latest`）を使う。
 
 ## このページで作るもの
 全国の検索トレンドを一望する「サマリ画面」。KPI3枚＋日本地図＋人気ワードTop20＋時系列トレンド＋コントロール2種。開くだけで「いつ・何が・どこで人気か」が分かる。

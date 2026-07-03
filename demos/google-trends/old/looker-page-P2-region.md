@@ -5,7 +5,7 @@
 **共通セットアップ手順書で完了済み**を前提とし、ここでは重複記載しない。
 
 - 共通セットアップ: [`looker-setup-common.md`](./looker-setup-common.md)
-- 操作の詳細リファレンス: [`looker-studio-capabilities.md`](../../docs/looker-studio-capabilities.md)
+- 操作の詳細リファレンス: [`looker-studio-capabilities.md`](../../../docs/looker-studio-capabilities.md)
 
 > 用語: **ディメンション**=分類軸（都道府県・ワード等）／ **指標**=数値（score・rank）。
 

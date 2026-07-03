@@ -1,0 +1,535 @@
+<title>検索トレンド 地域ビュー モック</title>
+<style>
+  :root {
+    --ground: #f7f8fa;
+    --card: #ffffff;
+    --ink: #12161c;
+    --ink-2: #4d5561;
+    --ink-3: #8a919c;
+    --hairline: #e4e7ec;
+    --baseline: #c9cdd6;
+    --blue: #2a78d6;
+    --aqua: #1baf7a;
+    --amber: #eda100;
+    --green: #008300;
+    --blue-soft: #e8f1fc;
+    --amber-soft: #fdf3dd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0e1013;
+      --card: #191c21;
+      --ink: #f4f5f7;
+      --ink-2: #b9bec8;
+      --ink-3: #7d838e;
+      --hairline: #2a2e35;
+      --baseline: #3a3f48;
+      --blue: #3987e5;
+      --aqua: #199e70;
+      --amber: #c98500;
+      --green: #008300;
+      --blue-soft: #17273c;
+      --amber-soft: #33270e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  .page { max-width: 980px; margin: 0 auto; padding: 28px 20px 72px; }
+
+  /* header */
+  .masthead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; margin-bottom: 6px; }
+  .masthead h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
+  .masthead .mock-note { font-size: 11.5px; color: var(--ink-3); }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 16px; }
+  .select {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1.5px solid var(--baseline); border-radius: 8px;
+    padding: 8px 14px; font-size: 15px; font-weight: 700;
+  }
+  .select .lbl { font-size: 12px; font-weight: 400; color: var(--ink-3); }
+  .select .caret { color: var(--ink-3); font-size: 11px; }
+  .weekchip {
+    font-size: 12px; color: var(--ink-2); background: var(--card);
+    border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 12px;
+  }
+
+  /* tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--hairline); margin-bottom: 26px; }
+  .tab {
+    padding: 9px 16px 8px; font-size: 13.5px; font-weight: 600; color: var(--ink-3);
+    border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent;
+    font-family: inherit;
+  }
+  .tab.on { color: var(--ink); border-bottom-color: var(--blue); }
+  .pane { display: none; }
+  .pane.on { display: block; }
+
+  /* sections */
+  .sec { margin-bottom: 34px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .sec-head .no { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-3); }
+  .sec-head h2 { font-size: 17px; font-weight: 800; margin: 0; }
+  .sec-head .q { font-size: 12.5px; color: var(--ink-3); }
+  .card {
+    background: var(--card); border: 1px solid var(--hairline); border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 34px; }
+  .kpi { background: var(--card); border: 1px solid var(--hairline); border-radius: 12px; padding: 13px 16px 11px; }
+  .kpi .v { font-size: 25px; font-weight: 800; letter-spacing: -0.01em; }
+  .kpi .v small { font-size: 13px; color: var(--ink-3); font-weight: 600; }
+  .kpi .k { font-size: 11.5px; color: var(--ink-3); }
+
+  /* rank rows */
+  .now-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .now-grid { grid-template-columns: 1fr; } }
+  .rank-list { display: grid; gap: 6px; }
+  .rank-row { display: grid; grid-template-columns: 30px 1fr 130px 42px; gap: 10px; align-items: center; padding: 4px 0; }
+  .rank-row .rk { font-size: 15px; font-weight: 800; color: var(--ink-3); font-variant-numeric: tabular-nums; text-align: right; }
+  .rank-row:nth-child(-n+3) .rk { color: var(--ink); }
+  .rank-row .tm { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge-new {
+    display: inline-block; margin-left: 7px; font-size: 10px; font-weight: 800;
+    color: #7a5200; background: var(--amber-soft); border: 1px solid var(--amber);
+    border-radius: 4px; padding: 0 5px; vertical-align: 2px; letter-spacing: 0.05em;
+  }
+  @media (prefers-color-scheme: dark) { .badge-new { color: #f0c162; } }
+  .rank-row .bar { height: 10px; }
+  .rank-row .bar i { display: block; height: 100%; background: var(--blue); border-radius: 0 3px 3px 0; min-width: 3px; }
+  .rank-row .sc { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
+  .stats { display: grid; gap: 12px; align-content: start; }
+  .stat { border-left: 3px solid var(--hairline); padding: 2px 0 2px 14px; }
+  .stat .v { font-size: 26px; font-weight: 800; line-height: 1.2; }
+  .stat .v small { font-size: 14px; color: var(--ink-3); }
+  .stat .k { font-size: 12px; color: var(--ink-3); }
+
+  /* charts */
+  .chart-wrap svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
+  .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .callout {
+    margin-top: 12px; font-size: 12.5px; color: var(--ink-2);
+    background: var(--blue-soft); border-radius: 8px; padding: 9px 13px;
+  }
+
+  /* duo mini bars */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .duo { grid-template-columns: 1fr; } }
+  .duo h3 { margin: 0 0 3px; font-size: 14px; font-weight: 800; }
+  .duo .sub { font-size: 12px; color: var(--ink-3); margin: 0 0 12px; }
+  .mini-row { display: grid; grid-template-columns: 1fr 110px 58px; gap: 10px; align-items: center; padding: 5px 0; }
+  .mini-row .tm { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini-row .bar { height: 9px; }
+  .mini-row .bar i { display: block; height: 100%; border-radius: 0 3px 3px 0; min-width: 3px; }
+  .mini-row .vv { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* pref bars */
+  .where-grid { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 720px) { .where-grid { grid-template-columns: 1fr; } }
+  .word-pick { font-size: 13px; color: var(--ink-2); }
+  .word-pick .w {
+    display: inline-block; font-size: 19px; font-weight: 800; color: var(--ink);
+    border-bottom: 3px solid var(--aqua); padding-bottom: 2px; margin: 4px 0 6px;
+  }
+  .pref-row { display: grid; grid-template-columns: 22px 130px 1fr 40px; gap: 10px; align-items: center; padding: 4px 0; }
+  .pref-row .rk { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; text-align: right; }
+  .pref-row .nm { font-size: 13.5px; font-weight: 600; }
+  .pref-row .bar { height: 9px; }
+  .pref-row .bar i { display: block; height: 100%; background: var(--aqua); border-radius: 0 3px 3px 0; min-width: 3px; }
+  .pref-row.me .bar i { background: var(--blue); }
+  .pref-row .vv { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* tables */
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--hairline); font-size: 12.5px; }
+  th { color: var(--ink-3); font-weight: 600; font-size: 11.5px; }
+  td.num { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+  .foot { margin-top: 8px; font-size: 11.5px; color: var(--ink-3); max-width: 74ch; }
+  .foot b { color: var(--ink-2); }
+
+  #tip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--ink); color: var(--ground); font-size: 11.5px;
+    border-radius: 6px; padding: 5px 9px; max-width: 260px;
+  }
+</style>
+
+<div class="page">
+
+  <div class="masthead">
+    <h1>検索トレンド 地域ビュー</h1>
+    <span class="mock-note">レイアウトモック — 数値は一部実測・一部架空</span>
+  </div>
+  <div class="controls">
+    <span class="select"><span class="lbl">都道府県</span> 大阪府 <span class="caret">▼</span></span>
+    <span class="select"><span class="lbl">ワード検索</span> <span style="color:var(--ink-3); font-weight:400;">例: 栗きんとん</span> <span class="caret">🔎</span></span>
+    <span class="weekchip">最新週: 2026-06-28（毎週更新）</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-pane="p1">P1 地域ビュー</button>
+    <button class="tab" data-pane="p2">P2 ワード深掘り</button>
+    <button class="tab" data-pane="p3">P3 全国サマリ</button>
+  </div>
+
+  <!-- ============================ P1 ============================ -->
+  <div class="pane on" id="p1">
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">01</span><h2>今週の顔ぶれ</h2><span class="q">— この県でいま何が検索されている？</span></div>
+      <div class="card now-grid">
+        <div class="rank-list" id="rankList"></div>
+        <div class="stats">
+          <div class="stat"><div class="v">25<small>ワード</small></div><div class="k">今週のランクイン数</div></div>
+          <div class="stat"><div class="v">6<small>ワード</small></div><div class="k">うち新顔（1ヶ月前は圏外）</div></div>
+          <div class="stat"><div class="v">266<small>週</small></div><div class="k">追跡期間（2021-05〜）</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">02</span><h2>いつ盛り上がった？</h2><span class="q">— ワードを選んで時系列比較（直近52週）</span></div>
+      <div class="card">
+        <div class="chart-wrap"><svg id="ts" viewBox="0 0 900 280" role="img" aria-label="選択ワードの週次スコア推移"></svg></div>
+        <div class="legend">
+          <span><i style="background:var(--blue)"></i>ブラジル 対 日本</span>
+          <span><i style="background:var(--aqua)"></i>栗きんとん</span>
+          <span><i style="background:var(--amber)"></i>介護</span>
+        </div>
+        <div class="callout">
+          読み方: 高さは「そのワード自身のピークを100とした相対値」。<b>量の比較ではなく、山の位置＝盛り上がった時期</b>を読む。
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">03</span><h2>地元ワードと急浮上</h2><span class="q">— この県ならではの語 / いま急に出てきた語</span></div>
+      <div class="duo">
+        <div class="card">
+          <h3>この県の地元ワード</h3><p class="sub">ランクイン実績がこの県に偏る語（バー=全国シェア。実測値）</p>
+          <div id="staples"></div>
+        </div>
+        <div class="card">
+          <h3>急浮上ワード</h3><p class="sub">4週間前とのスコア差が大きい順（今週）</p>
+          <div id="risers"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">04</span><h2>今週のTop25 一覧</h2><span class="q">— そのままエクスポート可能な明細</span></div>
+      <div class="card tablewrap">
+        <table>
+          <thead><tr><th>順位</th><th>ワード</th><th>ランクイン週数</th><th>今週ランクインした県数</th></tr></thead>
+          <tbody id="top25"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================ P2 ============================ -->
+  <div class="pane" id="p2">
+
+    <div class="kpis">
+      <div class="kpi"><div class="v">栗きんとん</div><div class="k">選択中のワード（ワード検索で切替）</div></div>
+      <div class="kpi"><div class="v">261<small>週</small></div><div class="k">ランクインした週（全266週中・実測）</div></div>
+      <div class="kpi"><div class="v">2025-12-28</div><div class="k">直近ピーク週</div></div>
+      <div class="kpi"><div class="v">愛知県</div><div class="k">最長ランクイン県（251週・実測）</div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">01</span><h2>5年間の推移</h2><span class="q">— 全期間（2021-05〜2026-06・週次）で見る「型」</span></div>
+      <div class="card">
+        <div class="chart-wrap"><svg id="ts5y" viewBox="0 0 900 250" role="img" aria-label="栗きんとんの5年間週次スコア推移"></svg></div>
+        <div class="callout">毎年<b>12月末（おせち需要）と9〜11月（新栗）</b>に山が繰り返す季節ワードだと一目で分かる。イベント一過性ワード（試合名など）との「型の違い」がここで見せられる。</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">02</span><h2>季節性</h2><span class="q">— 月別の平均スコア（5年平均・実測値）</span></div>
+      <div class="card">
+        <div class="chart-wrap"><svg id="seasonal" viewBox="0 0 900 200" role="img" aria-label="月別平均スコア"></svg></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">03</span><h2>どこの県のワード？</h2><span class="q">— ランクイン週数（各県のTop25に入った週の数）で比較</span></div>
+      <div class="card where-grid">
+        <div class="word-pick">
+          <div class="w">栗きんとん</div>
+          「その県のTop25に何週入ったか」で地元度を測る。<b>愛知・東京・岐阜＝中京圏と大都市で長期ランクイン</b>（数値は実測）。
+          スコアは各系列の自己ピーク比のため、県間の大小比較には使わない。
+        </div>
+        <div id="prefBars"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================ P3 ============================ -->
+  <div class="pane" id="p3">
+
+    <div class="kpis">
+      <div class="kpi"><div class="v">779<small>ワード</small></div><div class="k">追跡ワード数（実測）</div></div>
+      <div class="kpi"><div class="v">47<small>都道府県</small></div><div class="k">対象地域（実測）</div></div>
+      <div class="kpi"><div class="v">266<small>週</small></div><div class="k">追跡週数（実測）</div></div>
+      <div class="kpi"><div class="v">2026-06-28</div><div class="k">最新週（実測）</div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">01</span><h2>全国の今週Top10</h2><span class="q">— 今週ランクインした県の数が多い順（顔ぶれは実測・県数はモック）</span></div>
+      <div class="card"><div class="rank-list" id="natList"></div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="no">02</span><h2>県ごとの1位ワード</h2><span class="q">— 今週、各県で最も検索されたもの</span></div>
+      <div class="card tablewrap">
+        <table>
+          <thead><tr><th>都道府県</th><th>今週の1位</th><th>スコア</th><th>ひとこと</th></tr></thead>
+          <tbody id="prefTop"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    データ: BigQuery 公式 <b>google_trends</b>（日本・週次・都道府県別）を重複排除・NULL除去した
+    <b>jp_region_weekly</b>（177万行）。スコアは各「県×ワード」系列の自己ピーク=100 の相対値で、
+    検索回数の実数ではない。<b>大小の比較はワード間・県間とも不可</b>（全35,489系列がピーク=100と実測確認済み）。
+    比較には順位（最新週のみ有効）と、ランクイン週数・県数（Top25入りの実績＝検索量ベース）を使う。
+    スコアは同一系列の時系列（いつ盛り上がったか）にのみ使う。
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+(function () {
+  /* tabs */
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (x) { x.classList.remove("on"); });
+      document.querySelectorAll(".pane").forEach(function (x) { x.classList.remove("on"); });
+      t.classList.add("on");
+      document.getElementById(t.dataset.pane).classList.add("on");
+    });
+  });
+
+  var tip = document.getElementById("tip");
+  function showTip(evt, text) {
+    tip.textContent = text; tip.style.display = "block";
+    tip.style.left = Math.min(evt.clientX + 12, window.innerWidth - 270) + "px";
+    tip.style.top = (evt.clientY + 12) + "px";
+  }
+  function hideTip() { tip.style.display = "none"; }
+  function attachTip(el, text) {
+    el.addEventListener("mousemove", function (e) { showTip(e, text); });
+    el.addEventListener("mouseleave", hideTip);
+  }
+  var css = getComputedStyle(document.documentElement);
+  var C = { blue: css.getPropertyValue("--blue").trim(), aqua: css.getPropertyValue("--aqua").trim(),
+            amber: css.getPropertyValue("--amber").trim(), hair: css.getPropertyValue("--hairline").trim(),
+            ink3: css.getPropertyValue("--ink-3").trim() };
+  var NS = "http://www.w3.org/2000/svg";
+  function el(svg, name, attrs) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e); return e;
+  }
+
+  /* ---- P1-01: 今週の顔ぶれ（大阪。顔ぶれは実測、値は一部モック） ---- */
+  // 並び順 = latest_rank（県内順位）。バーはスコアではなく「ランクイン週数」
+  //（スコアは系列ごとの自己ピーク比のため、ワード間の大小比較に使えない）
+  var top10 = [
+    ["オランダ 対 モロッコ", 3, true], ["ブラジル 対 日本", 5, true], ["田中みな実", 210, false],
+    ["アスレチックス 対 ドジャース", 4, true], ["橋本愛", 178, false], ["佐野海舟 逮捕", 2, true],
+    ["パラグアイ", 3, true], ["クーニャ", 2, true], ["ブルージェイズ 対 メッツ", 36, false], ["天神祭 日程", 24, false]
+  ];
+  function rankRows(boxId, rows, max, unit) {
+    var box = document.getElementById(boxId);
+    rows.forEach(function (d, i) {
+      var row = document.createElement("div");
+      row.className = "rank-row";
+      row.innerHTML =
+        '<div class="rk">' + (i + 1) + '</div>' +
+        '<div class="tm">' + d[0] + (d[2] ? '<span class="badge-new">NEW</span>' : '') + '</div>' +
+        '<div class="bar"><i style="width:' + Math.max(1, Math.round(d[1] / max * 100)) + '%"></i></div>' +
+        '<div class="sc">' + d[1] + unit + '</div>';
+      attachTip(row.querySelector(".bar"), d[0] + "：" + d[1] + unit + (d[2] ? "（1ヶ月前は圏外の新顔）" : "ランクイン"));
+      box.appendChild(row);
+    });
+  }
+  rankRows("rankList", top10, 266, "週");
+
+  /* ---- P1-02: 直近52週 時系列 ---- */
+  var W = 52;
+  function gauss(i, mu, sig, amp) { return amp * Math.exp(-((i - mu) * (i - mu)) / (2 * sig * sig)); }
+  var brazil = [], kuri52 = [], kaigo = [];
+  for (var i = 0; i < W; i++) {
+    brazil.push(Math.round(Math.min(100, gauss(i, 50, 1.4, 100) + gauss(i, 44, 1.2, 30))));
+    kuri52.push(Math.round(Math.min(100, 3 + gauss(i, 14, 4, 45) + gauss(i, 25, 3, 95))));
+    kaigo.push(Math.round(62 + 18 * Math.sin(i / 4.2) + 12 * Math.sin(i / 9 + 2)));
+  }
+  function lineChart(svgId, seriesArr, nPts, months, h) {
+    var svg = document.getElementById(svgId);
+    var VW = 900, VH = h, L = 44, R = 116, T = 16, B = 34, PW = VW - L - R, PH = VH - T - B;
+    function X(i) { return L + PW * i / (nPts - 1); }
+    function Y(v) { return T + PH * (1 - v / 100); }
+    [0, 50, 100].forEach(function (v) {
+      el(svg, "line", { x1: L, y1: Y(v), x2: L + PW, y2: Y(v), stroke: C.hair, "stroke-width": 1 });
+      el(svg, "text", { x: L - 8, y: Y(v) + 4, "font-size": 10.5, fill: C.ink3, "text-anchor": "end" }).textContent = v;
+    });
+    months.forEach(function (m) {
+      el(svg, "text", { x: X(m[0]), y: T + PH + 20, "font-size": 10.5, fill: C.ink3, "text-anchor": "middle" }).textContent = m[1];
+    });
+    seriesArr.forEach(function (s) {
+      var pts = s.vals.map(function (v, i) { return X(i).toFixed(1) + "," + Y(v).toFixed(1); }).join(" ");
+      el(svg, "polyline", { points: pts, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round" });
+      if (s.label !== false)
+        el(svg, "text", { x: L + PW + 7, y: Y(s.vals[nPts - 1]) + 4, "font-size": 11, "font-weight": 700, fill: s.color }).textContent = s.name;
+      s.vals.forEach(function (v, i) {
+        var c = el(svg, "circle", { cx: X(i), cy: Y(v), r: 7, fill: "transparent", cursor: "crosshair" });
+        attachTip(c, s.name + "：スコア " + v + "（モック値）");
+      });
+    });
+  }
+  lineChart("ts",
+    [{ name: "ブラジル 対 日本", vals: brazil, color: C.blue },
+     { name: "栗きんとん", vals: kuri52, color: C.aqua },
+     { name: "介護", vals: kaigo, color: C.amber }],
+    W, [[0, "2025-07"], [13, "2025-10"], [26, "2026-01"], [39, "2026-04"], [50, "2026-06"]], 280);
+
+  /* ---- P1-03: 定番 / 急浮上 ---- */
+  function miniRows(elId, rows, color, unit) {
+    var box = document.getElementById(elId);
+    var max = rows[0][1];
+    rows.forEach(function (d) {
+      var row = document.createElement("div");
+      row.className = "mini-row";
+      row.innerHTML =
+        '<div class="tm">' + d[0] + '</div>' +
+        '<div class="bar"><i style="width:' + Math.round(d[1] / max * 100) + '%; background:' + color + '"></i></div>' +
+        '<div class="vv">' + d[2] + '</div>';
+      attachTip(row.querySelector(".bar"), d[0] + "：" + d[2] + unit);
+      box.appendChild(row);
+    });
+  }
+  // 大阪の地元ワード（jp_term_region_weeks の実測値。share=全国ランクイン週数に占める大阪の割合）
+  miniRows("staples", [
+    ["大阪府警察", 68, "68%"], ["高野 線", 62, "62%"], ["大阪 警報", 41, "41%"], ["南海電鉄", 30, "30%"]
+  ], C.blue, "＝大阪のシェア（均等なら約2%。実測値）");
+  miniRows("risers", [
+    ["佐野海舟 逮捕", 100, "+100"], ["オランダ 対 モロッコ", 100, "+100"], ["クーニャ", 95, "+95"],
+    ["パラグアイ", 90, "+90"], ["天神祭 日程", 61, "+61"]
+  ], C.amber, "（4週前比・モック値）");
+
+  /* ---- P1-04: Top25 テーブル ---- */
+  var t25 = document.getElementById("top25");
+  var extra = [["塩貝", 74], ["アンチェロッティ", 71], ["ビニシウス", 68], ["超ときめき宣伝部", 66],
+               ["マツダ ロードスターrf", 64], ["田中碧", 62], ["堂安", 60], ["中国輸出規制リスト", 58],
+               ["河西秀哉", 55], ["ラッシング トレード", 53], ["アスカラポス", 51], ["プロ 雀 士", 49],
+               ["中曽根 愛子 さま", 47], ["brazil vs japan", 45], ["パリーグ 順位", 43]];
+  var all25 = top10.map(function (d) { return [d[0], d[1], d[2]]; })
+    .concat(extra.map(function (d) { return [d[0], d[1], false]; }));
+  all25.forEach(function (d, i) {
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="num">' + (i + 1) + '</td>' +
+      '<td>' + d[0] + (d[2] ? '<span class="badge-new">NEW</span>' : '') + '</td>' +
+      '<td class="num">' + d[1] + '週</td>' +
+      '<td class="num">' + Math.max(3, 47 - i * 2) + '県</td>';
+    t25.appendChild(tr);
+  });
+
+  /* ---- P2-01: 5年時系列（栗きんとん） ---- */
+  var N5 = 261, kuri5y = [];
+  var peaks = [[18, 42], [29, 85], [70, 48], [81, 90], [122, 50], [133, 95], [174, 45], [185, 88], [226, 52], [237, 100]];  // 秋(新栗)+年末(おせち)の二山×5年
+  for (var j = 0; j < N5; j++) {
+    var v = 2;
+    peaks.forEach(function (p) { v += gauss(j, p[0], 4, p[1]); });
+    kuri5y.push(Math.round(Math.min(100, v)));
+  }
+  lineChart("ts5y",
+    [{ name: "栗きんとん", vals: kuri5y, color: C.aqua }],
+    N5, [[8, "2021-秋"], [60, "2022-秋"], [112, "2023-秋"], [164, "2024-秋"], [216, "2025-秋"], [256, "2026-06"]], 250);
+
+  /* ---- P2-02: 季節性（月別平均・モック） ---- */
+  (function () {
+    var svg = document.getElementById("seasonal");
+    var vals = [12.4, 4.0, 4.1, 3.8, 4.8, 8.8, 4.7, 10.3, 21.2, 19.4, 12.7, 41.9];  // 1〜12月（実測）
+    var labels = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+    var VW = 900, VH = 200, L = 44, R = 20, T = 14, B = 30, PW = VW - L - R, PH = VH - T - B;
+    var bw = PW / 12;
+    [0, 50, 100].forEach(function (v) {
+      var y = T + PH * (1 - v / 100);
+      el(svg, "line", { x1: L, y1: y, x2: L + PW, y2: y, stroke: C.hair, "stroke-width": 1 });
+      el(svg, "text", { x: L - 8, y: y + 4, "font-size": 10.5, fill: C.ink3, "text-anchor": "end" }).textContent = v;
+    });
+    vals.forEach(function (v, i) {
+      var h = PH * v / 100;
+      var r = el(svg, "rect", {
+        x: L + i * bw + bw * 0.18, y: T + PH - h, width: bw * 0.64, height: Math.max(2, h),
+        fill: C.aqua, rx: 3
+      });
+      attachTip(r, labels[i] + "：平均スコア " + v + "（5年平均・実測値）");
+      el(svg, "text", { x: L + i * bw + bw / 2, y: T + PH + 18, "font-size": 10.5, fill: C.ink3, "text-anchor": "middle" }).textContent = labels[i];
+      if (v >= 12)
+        el(svg, "text", { x: L + i * bw + bw / 2, y: T + PH - h - 6, "font-size": 10.5, "font-weight": 700, fill: C.ink3, "text-anchor": "middle" }).textContent = v;
+    });
+  })();
+
+  /* ---- P2-03: 県別バー（1位岐阜=実測） ---- */
+  // ランクイン週数（その県のTop25に入った週の数）。県間比較が成立する実測指標
+  var prefs = [
+    ["愛知県", 251, true], ["東京都", 238, false], ["岐阜県", 190, false], ["大阪府", 157, false],
+    ["神奈川県", 141, false], ["埼玉県", 115, false], ["静岡県", 104, false], ["千葉県", 104, false]
+  ];
+  var pb = document.getElementById("prefBars");
+  prefs.forEach(function (d, i) {
+    var row = document.createElement("div");
+    row.className = "pref-row" + (d[2] ? " me" : "");
+    row.innerHTML =
+      '<div class="rk">' + (i + 1) + '</div>' +
+      '<div class="nm">' + d[0] + (d[2] ? " ★" : "") + '</div>' +
+      '<div class="bar"><i style="width:' + Math.round(d[1] / prefs[0][1] * 100) + '%"></i></div>' +
+      '<div class="vv">' + d[1] + '週</div>';
+    attachTip(row.querySelector(".bar"), d[0] + "：ランクイン " + d[1] + "週（実測）");
+    pb.appendChild(row);
+  });
+
+  /* ---- P3-01: 全国Top10（顔ぶれ・スコアとも実測） ---- */
+  rankRows("natList", [
+    ["橋本愛", 47, false], ["田中みな実", 47, false], ["オランダ 対 モロッコ", 46, false],
+    ["クーニャ", 45, false], ["ブラジル 対 日本", 44, false], ["塩貝", 43, false],
+    ["アスレチックス 対 ドジャース", 42, false], ["パラグアイ", 41, false],
+    ["ブラジル スタメン", 40, false], ["ブルージェイズ 対 メッツ", 39, false]
+  ], 47, "県");
+
+  /* ---- P3-02: 県ごとの1位（モック） ---- */
+  var prefTop = [
+    ["東京都", "ブラジル 対 日本", 100, "サッカー日本代表戦（実測1位）"],
+    ["大阪府", "オランダ 対 モロッコ", 100, "W杯カード（実測1位）"],
+    ["岐阜県", "ブラジル 対 日本", 100, "全国区の話題（モック）"],
+    ["北海道", "田中みな実", 100, "芸能（モック）"],
+    ["愛知県", "アスレチックス 対 ドジャース", 100, "MLB（モック）"],
+    ["福岡県", "橋本愛", 100, "芸能（モック）"]
+  ];
+  var pt = document.getElementById("prefTop");
+  prefTop.forEach(function (d) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td>' + d[0] + '</td><td>' + d[1] + '</td><td class="num">' + d[2] + '</td><td class="num">' + d[3] + '</td>';
+    pt.appendChild(tr);
+  });
+})();
+</script>

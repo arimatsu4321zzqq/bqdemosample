@@ -5,7 +5,7 @@
 
 > **前提（先に済ませておくこと）**
 > - [`looker-setup-common.md`](./looker-setup-common.md) の STEP 0〜5（レポート作成／データソース3本／**既定集計の修正**／テーマ／4ページ構成／レポートレベルの期間コントロール）が完了していること。
-> - 操作の詳細・用語は [`looker-studio-capabilities.md`](../../docs/looker-studio-capabilities.md) を参照（本書では重複説明しない）。
+> - 操作の詳細・用語は [`looker-studio-capabilities.md`](../../../docs/looker-studio-capabilities.md) を参照（本書では重複説明しない）。
 > - 使うデータソースは **`週×ワード(全国)` = `dash_jp_terms_weekly`** の1本だけ。既定集計は共通手順書のとおり（`avg_score`=平均 / `max_score`=最大 / `best_rank`=最小 / `region_count`=平均）。
 
 ---

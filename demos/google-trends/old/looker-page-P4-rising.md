@@ -6,7 +6,7 @@
 > 本ページは共通セットアップが完了している前提。データソース追加・フィールド型/既定集計・テーマ・
 > 期間コントロール等の土台は繰り返さない。必ず先に下記2つを読むこと。
 > - 共通セットアップ: [`looker-setup-common.md`](./looker-setup-common.md)
-> - 機能リファレンス: [`looker-studio-capabilities.md`](../../docs/looker-studio-capabilities.md)
+> - 機能リファレンス: [`looker-studio-capabilities.md`](../../../docs/looker-studio-capabilities.md)
 
 ---
 

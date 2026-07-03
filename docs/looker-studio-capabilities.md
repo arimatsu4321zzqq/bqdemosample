@@ -47,7 +47,7 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 - **ローソク足 (Candlestick)**: 高安始終値。
 - **コミュニティビジュアル (Community Visualizations)**: サードパーティ製（サンキー、ワードクラウド、ファネル 等）。→ 第9節。
 
-（ドキュメント上「Sankey / Waterfall / Boxplot / Timeline / Funnel」等も種類一覧に登場するが、環境により標準搭載かコミュニティ版か差があるため、実機で確認）
+- **サンキー / ウォーターフォール / ボックスプロット / タイムライン / ファネル**: 公式のチャート種類一覧（types-of-charts）に**標準チャートとして掲載**（2026-07確認。旧来はコミュニティビジュアル扱いだったもの）。
 
 ---
 
@@ -81,7 +81,12 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 - ズームエリアは選択した地理型に応じて World / Continent / Subcontinent / Country / Region から選べる。
 
 ### Google マップ
-- **位置(Location)フィールドが必須**（緯度経度型、住所型、または地理ディメンション）。バブル=サイズ/色に指標。**Google マップはオプション指標(optional metrics)非対応**。
+- **位置(Location)フィールドが必須**（緯度経度型、住所型、または地理ディメンション。Google Maps がジオコーディングできる型なら可）。**Google マップはオプション指標(optional metrics)非対応**。
+- バブルマップのフィールドスロット（公式リファレンスで確認済み）:
+  - **位置**（必須）／**サイズ指標**（必須）
+  - **色ディメンション** or **色指標**（どちらか一方。**カテゴリなどのディメンションでバブルを色分け可能**）
+  - **ツールチップ**（任意のディメンション。公式例:「位置は店舗の住所、ツールチップに店舗名」。**位置と1:1の関係が必要**）
+- **上限**: 緯度経度フィールドなら**バブル100万個**まで。その他の地理型（住所・都市等）は3,500個まで。
 - 緯度経度の精度は**小数5〜6桁程度に丸める**のが推奨。
 
 ---
@@ -109,9 +114,12 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 ## 5. フィルタ & コントロール
 
 ### コントロール（閲覧者が操作する部品）
-- **ドロップダウンリスト**: 単一/複数選択。値の多いディメンション向け。
+- **ドロップダウンリスト**: 単一/複数選択（**単一選択モード**あり。単一選択OFFの場合はデフォルト値が必須）。
+  **「デフォルトの選択項目」プロパティで既定値を設定可能**（データに現れる表記そのまま。カンマ区切りで複数可）。
 - **固定サイズリスト (fixed-size list)**: 常時展開されたリスト。
-- **入力ボックス (検索ボックス)**: テキストで絞り込み。
+- **入力ボックス (検索ボックス)**: テキストで絞り込み。**検索タイプは既定が「完全一致(Equals)」**で、
+  「含む / 前方一致 / 正規表現 / In（カンマ区切り）」に変更可能。部分一致検索にしたい場合は
+  **必ず「含む」に変更する**こと。テキストの一致は原則大文字小文字を区別（コネクタにより差あり）。
 - **高度なフィルタ (advanced filter)**: 含む/等しい等の条件入力。
 - **チェックボックス (tickbox)**。
 - **スライダー (slider)**: 数値レンジで絞り込み（指標スライダー）。
@@ -123,6 +131,24 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 - **ページ単位**: そのページの全チャートに適用。
 - **チャート単位**: 個別チャートにのみ適用。
 - コントロールも配置場所（ページ or レポートレベル）と「コントロールのグループ化/適用対象」で影響範囲が決まる。手順書では「期間コントロールはレポートレベルに置いて全ページ共通」等を明記すると良い。
+- **コントロールを特定チャートだけに効かせる（公式確認済み）**: コントロールと対象チャートを選択して**「配置 > グループ化」（Ctrl+G）**すると、そのコントロールは**グループ内のチャートにのみ適用**され、同一ページ上のグループ外チャートは影響を受けない。
+  （例: 「自治体ドロップダウン」をKPI・マップとグループ化し、「自治体間比較」チャートをグループ外に置けば、比較チャートだけ全自治体表示を維持できる）
+- **複数データソースをまたぐフィルタ（公式確認済み）**: フィルタコントロールは**フィールドIDが一致すれば
+  別データソースのチャートにも効く**。IDが一致しない場合は「リソース → フィールド名とIDの管理 →
+  フィールドの上書きを追加」で**両ソースのフィールドに同じIDを割り当てる**と1つのコントロールで統一できる。
+  注意: ①同じIDにするフィールドは**同じデータ型**であること、②**使用中フィールドのID変更は
+  そのフィールドを使うチャートを壊す**（チャート構築前にID統一を済ませるのが安全）。
+  ブレンドを使わずにクロスフィルタしたいときの正攻法。
+
+### パラメータ（Parameters）— 閲覧者入力を受け取る仕組み
+- **フィルタとは別物**。閲覧者が入力した「値」をレポートに渡す機能で、用途は3つ:
+  1. **計算フィールドで使用**（ディメンション/指標と同様に式に組み込める。例: `CASE WHEN muni_name = 選択パラメータ THEN "選択中" ELSE "その他" END` で選択自治体の強調色分け）
+  2. **BigQuery カスタムクエリに渡す**（クエリ内で `@param_name` として参照。**値はすべて文字列で渡る**ため日付・数値は `CAST` / `PARSE_DATE` 等で変換する）
+  3. コミュニティコネクタに渡す
+- データ型: テキスト / 数値 / ブール。**許可値**を「リスト（値＋表示名）」「範囲（min/max）」「任意」から設定可。
+- 閲覧者の入力手段: **入力ボックス / ドロップダウン・固定リスト / スライダー / チェックボックス**の各コントロールにパラメータを紐付ける。
+- 注意: パラメータIDを後から変更すると参照する計算フィールド・コンポーネントが壊れる。URL からのパラメータ上書きは既定で無効（明示的に許可が必要）。
+- レビュアー案の「バウンディングボックスを閲覧者に入力してもらう」はこの機能で実現可能（数値パラメータ×4 → カスタムクエリの WHERE に渡す）。
 
 ---
 
@@ -176,6 +202,7 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 - **キャッシュは保証されない**: 鮮度設定内でも BigQuery に再クエリが飛び得る。コスト/クォータに注意。パフォーマンスは Extract / BI Engine で担保。
 - **描画**: カテゴリ/系列が多すぎると円グラフ等は見づらい。行数を集計・上限設定で抑える。
 - **無料版**: 基本機能（レポート作成/共有/多くのコネクタ）は無料。**Looker Studio Pro**は組織管理・SLA・チームワークスペース等の追加機能（本手順書の標準機能は無料版で構築可能）。
+- **Gemini in Looker / Conversational Analytics（レポート内の自然言語Q&A）**: Looker Studio 内でデータソースに自然言語で質問しチャート/表で回答を得る機能が存在するが、**Looker Studio Pro サブスクリプション＋Gemini in Looker 有効化が必要（Preview）**。無料版では使えないため、本デモの自然言語Q&Aは従来方針どおり **Conversational Analytics API（データエージェント）側で見せる**のが正解。ほかに計算フィールドの式を Gemini が提案する機能などもある（Pro）。
 
 ---
 
@@ -194,6 +221,12 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
 - レイアウト/テーマ: https://docs.cloud.google.com/looker/docs/studio/report-and-page-layout ／ https://docs.cloud.google.com/looker/docs/studio/themes
 - 共有/埋め込み/配信: https://docs.cloud.google.com/looker/docs/studio/embed-a-report ／ https://cloud.google.com/looker/docs/studio/schedule-automatic-report-delivery
 - コミュニティビジュアル: https://docs.cloud.google.com/looker/docs/visualization-types ／ https://support.google.com/looker-studio/thread/25840009
+- パラメータ: https://docs.cloud.google.com/looker/docs/studio/parameters ／ https://docs.cloud.google.com/looker/docs/studio/use-parameters-in-a-custom-query
+- コントロールの適用先限定（グループ化）: https://docs.cloud.google.com/looker/docs/studio/apply-controls-to-specific-charts
+- 複数データソースをまたぐフィルタ（フィールドID）: https://docs.cloud.google.com/looker/docs/studio/use-controls-across-data-sources
+- 入力ボックスの検索タイプ: https://docs.cloud.google.com/looker/docs/studio/input-box-control
+- ドロップダウンのデフォルト選択・単一選択: https://docs.cloud.google.com/looker/docs/studio/drop-down-list-and-fixed-size-list-control
+- Gemini in Looker / Conversational Analytics（Looker Studio Pro）: https://docs.cloud.google.com/looker/docs/studio/gemini-overview-looker-studio ／ https://docs.cloud.google.com/looker/docs/studio/conversational-analytics-overview
 - 制約/行数: https://docs.cloud.google.com/looker/docs/best-practices/row-limits-in-looker ／ https://www.swydo.com/blog/looker-studio-limitations/
 
 ---
@@ -205,5 +238,5 @@ BigQuery の検索トレンドデータで4ページのダッシュボードを�
    - Geo チャートの**ズームエリアを「日本」/「地域」に設定**しないと都道府県が表示されない点。
    - 塗り分けが不安定な場合は**緯度経度によるバブルマップ（Google マップ）**にフォールバック。
 2. **`LATITUDE` / `LONGITUDE` 関数の有無**: 緯度経度データ型から成分を取り出す関数として存在すると思われるが、公式 Function list（support.google.com/looker-studio/table/6379764）で正確な関数名・引数を確認すること。
-3. **標準チャートとしてのサンキー/ファネル/ウォーターフォール**: ドキュメントの種類一覧に登場するが、標準搭載かコミュニティビジュアルかは編集画面で確認。
+3. ~~標準チャートとしてのサンキー/ファネル/ウォーターフォール~~ → **解決（2026-07）**: 公式チャート種類一覧に標準チャートとして掲載済み。
 4. **無料版とProの機能差**: 本リファレンスの構築手順は無料版前提。Pro 固有機能は使用しない想定。

@@ -2,7 +2,7 @@
 
 6つの手順書を行き来せず、**これ1枚で3時間走り切る**ための凝縮版。各チャートは「コア（必須）」と
 「任意（時間が余ったら）」に分け、タイムボックスを超えたら任意を捨てて次ページへ進む。
-詳細な操作やハマり対処は各ページ手順書と [`../../../docs/looker-studio-capabilities.md`](../../../docs/looker-studio-capabilities.md) を参照。
+詳細な操作やハマり対処は各ページ手順書と [`../../../../docs/looker-studio-capabilities.md`](../../../../docs/looker-studio-capabilities.md) を参照。
 
 - データ: `ci-ss4-develop.demo_google_trends`（US）の `dash_jp_terms_weekly` / `dash_jp_region_latest` / `dash_jp_rising_recent`
 - 原則: **タイマーを各区間でセット**。区間終了で未完でも次へ。仕上げ(最後の10分)で帳尻を合わせる。

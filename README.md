@@ -41,22 +41,28 @@
 
 ## デモ一覧（`demos/` 配下・1テーマ1フォルダで自己完結）
 
-採用したデモだけフォルダ化する。各フォルダは `README.md / setup.md / sql/ / agent/ /
-data-dictionary.md / looker-layout.md` を持ち、そのデモ単体で再現・受け渡しできる。
+採用したデモだけフォルダ化し、そのデモ単体で再現・受け渡しできる標準構成
+（README / setup / data-flow / data-dictionary / sql / agent / mock / looker手順書）を持つ。
+**構成の詳細は [`demos/README.md`](demos/README.md)**。
 Looker Studio 共通ノウハウは [`docs/looker-common.md`](docs/looker-common.md)。
 お客様アカウントへの会話分析エージェント共有（IAM）手順は [`docs/access-sharing-setup.md`](docs/access-sharing-setup.md)。
 
 | # | デモ | テーマ | 元データ | ステータス |
 |---|---|---|---|---|
-| ① | [google-trends](demos/google-trends/) | 検索トレンド（地域×時系列） | `google_trends` | ✅ 構築済み（動作検証済み） |
+| ① | [google-trends](demos/google-trends/) | 検索トレンド地域ビュー（県で絞る×時系列） | `google_trends` | ✅ BQ・エージェント構築済み／Looker は手順書・モックまで |
+| ② | [osm-facilities](demos/osm-facilities/) | 地域施設マップ（市区町村で絞る×分布) | `geo_openstreetmap` | ✅ BQ・エージェント構築済み／Looker は手順書・モックまで |
 
-### 追加候補（採用保留）
+> 題材を「地域で絞って傾向・特徴を見る」観点でどう選んだかの経緯は
+> [`demos/demo-selection-rationale.md`](demos/demo-selection-rationale.md) に記録。
 
-第2・第3デモの候補は [`demos/candidate-datasets.md`](demos/candidate-datasets.md) に辞書・レイアウト案を退避。
-採用が決まったら google-trends を雛形に `demos/<名前>/` を作成する。
+### 候補一覧（採用状況つき）
 
-- `thelook_ecommerce` — EC売上BI（売上・顧客・商品）
-- `austin_bikeshare` — 人流・移動（ドコモ親和）
+検討した全候補と採用/保留の理由は [`demos/candidate-overview.md`](demos/candidate-overview.md) に集約。
+
+- 🔶 `ghcn_d` — 日本の日別気象（長期気候トレンド・豪雨/豪雪分析）: 第3デモ最有力（実データ検証済み）
+- ⬜ `thelook_ecommerce` / `austin_bikeshare` — 保留
+
+各候補の調査詳細・データ辞書・設計案は [`demos/candidate-datasets.md`](demos/candidate-datasets.md) に集約。
 
 ## データ（第一弾は BQ public のみ・ロード作業なし）
 

@@ -1,0 +1,524 @@
+<title>OSM施設マップ ダッシュボード モック</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --ink-3: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --ring: rgba(11,11,11,0.10);
+    --c-hospital: #2a78d6;
+    --c-clinic: #1baf7a;
+    --c-school: #eda100;
+    --c-community: #008300;
+    --c-library: #4a3aa7;
+    --c-fire: #e34948;
+    --accent: #2a78d6;
+    --water: #b7d3f6;
+    --land: #f0efec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --ink-3: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --ring: rgba(255,255,255,0.10);
+      --c-hospital: #3987e5;
+      --c-clinic: #199e70;
+      --c-school: #c98500;
+      --c-community: #008300;
+      --c-library: #9085e9;
+      --c-fire: #e66767;
+      --accent: #3987e5;
+      --water: #184f95;
+      --land: #232322;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-size: 13px; line-height: 1.55;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 64px; }
+
+  .intro { margin-bottom: 20px; }
+  .intro .eyebrow {
+    font-size: 11px; letter-spacing: 0.08em; color: var(--ink-3);
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .intro h1 { font-size: 21px; margin: 0 0 6px; font-weight: 700; text-wrap: balance; }
+  .intro p { margin: 0; color: var(--ink-2); max-width: 62ch; }
+
+  .board {
+    background: var(--surface); border: 1px solid var(--ring); border-radius: 10px;
+    overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .board-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    padding: 14px 18px; border-bottom: 1px solid var(--grid);
+  }
+  .board-title { font-size: 15px; font-weight: 700; margin-right: auto; }
+  .control {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--baseline); border-radius: 6px;
+    padding: 5px 10px; color: var(--ink); background: transparent;
+    font-size: 12.5px; cursor: default;
+  }
+  .control b { font-weight: 600; }
+  .control .lbl { color: var(--ink-3); font-weight: 400; }
+  .control .caret { color: var(--ink-3); font-size: 10px; }
+  .stamp {
+    font-size: 11.5px; color: var(--ink-2);
+    background: color-mix(in oklab, var(--c-school) 14%, var(--surface));
+    border: 1px solid color-mix(in oklab, var(--c-school) 35%, var(--surface));
+    border-radius: 999px; padding: 3px 10px;
+  }
+  .tabs { display: flex; gap: 2px; padding: 0 18px; border-bottom: 1px solid var(--grid); }
+  .tab {
+    padding: 8px 12px 7px; font-size: 12.5px; color: var(--ink-3);
+    border-bottom: 2px solid transparent; background: none; border-top: none;
+    border-left: none; border-right: none; cursor: pointer; font-family: inherit;
+  }
+  .tab.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+
+  .board-body { padding: 18px; display: grid; gap: 14px; }
+  .board-body.pane { display: none; }
+  .board-body.pane.on { display: grid; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .kpi {
+    border: 1px solid var(--grid); border-radius: 8px; padding: 12px 14px 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .kpi .k-label { font-size: 11.5px; color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
+  .kpi .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .kpi .k-value { font-size: 27px; font-weight: 700; letter-spacing: -0.01em; }
+  .kpi .k-value small { font-size: 13px; color: var(--ink-3); font-weight: 600; }
+  .kpi .k-sub { font-size: 11px; color: var(--ink-3); }
+
+  .main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; }
+  @media (max-width: 780px) { .main { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid var(--grid); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+  .panel h3 { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+  .panel .sub { font-size: 11.5px; color: var(--ink-3); margin: 0 0 10px; }
+
+  .mapbox { position: relative; }
+  .mapbox svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-2); }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  .bars { display: grid; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 84px 1fr 52px; align-items: center; gap: 8px; }
+  .bar-row .b-label { font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { height: 14px; position: relative; }
+  .bar-track::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--baseline);
+  }
+  .bar-fill { height: 100%; border-radius: 0 4px 4px 0; min-width: 3px; }
+  .bar-row .b-val { font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; color: var(--ink); }
+  .bar-row.me .b-label { color: var(--ink); font-weight: 600; }
+  .divider-note { font-size: 11px; color: var(--ink-3); margin-top: 10px; border-top: 1px dashed var(--grid); padding-top: 8px; }
+
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); font-size: 12.5px; }
+  th { color: var(--ink-3); font-weight: 600; font-size: 11.5px; }
+  td.num { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  td.heat { font-variant-numeric: tabular-nums; text-align: right; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;
+    border-radius: 999px; padding: 2px 9px; border: 1px solid var(--grid); color: var(--ink-2);
+  }
+  .chip i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+  .searchbox {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1.5px solid var(--baseline); border-radius: 8px; padding: 7px 12px;
+    font-size: 13px; background: var(--surface); min-width: 260px;
+  }
+  .searchbox .q { font-weight: 600; }
+  .hitnote { font-size: 12px; color: var(--ink-2); margin: 10px 0 4px; }
+  .hitnote b { color: var(--ink); }
+
+  #tip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--ink); color: var(--page); font-size: 11.5px;
+    border-radius: 6px; padding: 5px 9px; max-width: 240px;
+  }
+  .foot { margin-top: 22px; font-size: 11.5px; color: var(--ink-3); max-width: 70ch; }
+</style>
+
+<div class="wrap">
+  <div class="intro">
+    <div class="eyebrow">Layout mock — Looker Studio 想定</div>
+    <h1>地域施設マップ（OpenStreetMap）ダッシュボード モック</h1>
+    <p>自治体ドロップダウンで切り替えると、KPI・地図・比較・一覧がすべてその自治体に絞られる想定。
+       数値は「実測」表記のもの以外は<b>架空のモック値</b>。</p>
+  </div>
+
+  <div class="board">
+    <div class="board-head">
+      <div class="board-title">🏥 地域施設マップ</div>
+      <span class="control"><span class="lbl">都道府県</span> <b>岐阜県</b> <span class="caret">▼</span></span>
+      <span class="control"><span class="lbl">自治体</span> <b>岐阜市</b> <span class="caret">▼</span></span>
+      <span class="control"><span class="lbl">カテゴリ</span> <b>すべて</b> <span class="caret">▼</span></span>
+      <span class="stamp">データ時点: 2021-11（OSMスナップショット）</span>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-pane="p1">P1 施設マップ</button>
+      <button class="tab" data-pane="p2">P2 自治体比較</button>
+      <button class="tab" data-pane="p3">P3 施設リスト</button>
+    </div>
+
+    <!-- ================= P1 ================= -->
+    <div class="board-body pane on" id="p1">
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="k-label">施設総数</div>
+          <div class="k-value">247</div>
+          <div class="k-sub">岐阜市・全カテゴリ（実測）</div>
+        </div>
+        <div class="kpi">
+          <div class="k-label"><i class="swatch" style="background:var(--c-hospital)"></i>病院</div>
+          <div class="k-value">40</div>
+          <div class="k-sub">amenity=hospital（実測）</div>
+        </div>
+        <div class="kpi">
+          <div class="k-label"><i class="swatch" style="background:var(--c-school)"></i>学校</div>
+          <div class="k-value">123</div>
+          <div class="k-sub">amenity=school（実測）</div>
+        </div>
+        <div class="kpi">
+          <div class="k-label"><i class="swatch" style="background:var(--c-community)"></i>公民館・集会所</div>
+          <div class="k-value">40</div>
+          <div class="k-sub">amenity=community_centre（実測）</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="panel mapbox">
+          <h3>施設分布マップ</h3>
+          <p class="sub">Looker Studio の Google マップ（バブル）。色 = カテゴリ、ホバーで施設名</p>
+          <svg id="map" viewBox="0 0 520 400" role="img" aria-label="岐阜市の施設分布（モック）"></svg>
+          <div class="legend">
+            <span><i style="background:var(--c-hospital)"></i>病院</span>
+            <span><i style="background:var(--c-clinic)"></i>クリニック</span>
+            <span><i style="background:var(--c-school)"></i>学校</span>
+            <span><i style="background:var(--c-community)"></i>公民館・集会所</span>
+          </div>
+        </div>
+
+        <div style="display:grid; gap:14px; min-width:0;">
+          <div class="panel">
+            <h3>カテゴリ内訳</h3>
+            <p class="sub">岐阜市の施設数（実測）</p>
+            <div class="bars" id="catBars"></div>
+          </div>
+          <div class="panel">
+            <h3>県内の自治体と比較</h3>
+            <p class="sub">施設総数（実測）。※自治体▼の適用対象外</p>
+            <div class="bars" id="muniBars"></div>
+            <div class="divider-note">人口データを結合すると「人口1万人あたり施設数」に切替可</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>施設一覧</h3>
+        <p class="sub">クリックでマップ連動（クロスフィルタ）を想定</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>施設名</th><th>カテゴリ</th><th>OSMタグ</th><th>緯度</th><th>経度</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= P2 ================= -->
+    <div class="board-body pane" id="p2">
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="k-label">対象自治体数</div>
+          <div class="k-value">42</div>
+          <div class="k-sub">岐阜県（実測）</div>
+        </div>
+        <div class="kpi">
+          <div class="k-label">施設総数</div>
+          <div class="k-value">1,452</div>
+          <div class="k-sub">岐阜県・全カテゴリ（実測）</div>
+        </div>
+        <div class="kpi">
+          <div class="k-label">全国</div>
+          <div class="k-value">87,745</div>
+          <div class="k-sub">47都道府県・1,684自治体（実測）</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="panel">
+          <h3>県内ランキング Top10</h3>
+          <p class="sub">施設総数・岐阜県（実測）。カテゴリ▼で病院数などに切替</p>
+          <div class="bars" id="rankGifu"></div>
+        </div>
+        <div class="panel">
+          <h3>全国ランキング Top5</h3>
+          <p class="sub">都道府県▼を外すと全国比較（実測）。※順位はOSM登録数＝地図の充実度も反映</p>
+          <div class="bars" id="rankNation"></div>
+          <div class="divider-note">仙台市が3位に入るのは東北のマッピング活動が活発なため。登録密度の差ごと見せるのが誠実</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>自治体 × カテゴリ（ピボット・ヒートマップ）</h3>
+        <p class="sub">どの自治体がどの施設に厚いか。岐阜市の行は実測、他はモック値</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>自治体</th><th style="text-align:right">病院</th><th style="text-align:right">クリニック</th><th style="text-align:right">学校</th><th style="text-align:right">公民館・集会所</th><th style="text-align:right">図書館</th><th style="text-align:right">消防署</th></tr></thead>
+            <tbody id="pivot"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= P3 ================= -->
+    <div class="board-body pane" id="p3">
+
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+        <span class="searchbox">🔎 <span class="q">小学校</span><span style="color:var(--ink-3); margin-left:auto;">×</span></span>
+        <span class="control"><span class="lbl">都道府県</span> <b>すべて</b> <span class="caret">▼</span></span>
+        <span class="control"><span class="lbl">自治体</span> <b>すべて</b> <span class="caret">▼</span></span>
+        <span class="control"><span class="lbl">カテゴリ</span> <b>すべて</b> <span class="caret">▼</span></span>
+      </div>
+
+      <div class="panel">
+        <h3>施設リスト（全国明細）</h3>
+        <p class="sub">全 87,745 行のうち、施設名「小学校」で <b>20,687 件</b>にヒット（実測）。50行/ページでページング</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>施設名</th><th>カテゴリ</th><th>都道府県</th><th>自治体</th><th>緯度</th><th>経度</th></tr></thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
+        <div class="hitnote">1〜8 / 20,687 件　‹ 1 2 3 … 414 ›　（表を右クリック→エクスポートでCSV化可能）</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="foot">
+    ※ OSMデータに時系列はないため「推移グラフ」は作れない（スナップショットの分布・件数・比較が主役）。
+    避難所タグは全国354件のみのため「避難所になり得る施設（学校・公民館）」として見せる。
+    出典: © OpenStreetMap contributors（ODbL）／登録密度は自治体により差がある。
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+(function () {
+  /* tabs */
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (x) { x.classList.remove("on"); });
+      document.querySelectorAll(".pane").forEach(function (x) { x.classList.remove("on"); });
+      t.classList.add("on");
+      document.getElementById(t.dataset.pane).classList.add("on");
+    });
+  });
+
+  var CAT = {
+    hospital:  { label: "病院",           color: "var(--c-hospital)",  n: 40 },
+    clinic:    { label: "クリニック",     color: "var(--c-clinic)",    n: 18 },
+    school:    { label: "学校",           color: "var(--c-school)",    n: 123 },
+    community: { label: "公民館・集会所", color: "var(--c-community)", n: 40 },
+    library:   { label: "図書館",         color: "var(--c-library)",   n: 9 },
+    fire:      { label: "消防署",         color: "var(--c-fire)",      n: 17 }
+  };
+
+  var tip = document.getElementById("tip");
+  function showTip(evt, text) {
+    tip.textContent = text;
+    tip.style.display = "block";
+    tip.style.left = Math.min(evt.clientX + 12, window.innerWidth - 250) + "px";
+    tip.style.top = (evt.clientY + 12) + "px";
+  }
+  function hideTip() { tip.style.display = "none"; }
+  function attachTip(el, text) {
+    el.addEventListener("mousemove", function (e) { showTip(e, text); });
+    el.addEventListener("mouseleave", hideTip);
+  }
+
+  /* ---- P1: map ---- */
+  var svg = document.getElementById("map");
+  var NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  el("rect", { x: 0, y: 0, width: 520, height: 400, rx: 8, fill: "var(--land)" });
+  var boundary = el("path", {
+    d: "M118,64 C176,28 268,22 330,48 C398,76 462,120 452,192 C444,252 400,296 344,330 C288,364 208,372 152,338 C96,304 60,244 66,180 C71,128 84,86 118,64 Z",
+    fill: "var(--surface)", stroke: "var(--baseline)", "stroke-width": 1.5
+  });
+  el("path", {
+    d: "M84,146 C160,178 214,150 268,182 C330,218 384,204 448,246",
+    fill: "none", stroke: "var(--water)", "stroke-width": 7, "stroke-linecap": "round", opacity: 0.8
+  });
+  el("text", { x: 300, y: 176, "font-size": 10, fill: "var(--ink-3)" }).textContent = "長良川（イメージ）";
+  el("text", { x: 210, y: 110, "font-size": 12, fill: "var(--ink-3)", "font-weight": 600 }).textContent = "岐阜市（境界イメージ）";
+
+  var seed = 42;
+  function rnd() { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+
+  var nameStock = {
+    hospital: ["中央総合病院", "北部医療センター", "長良川記念病院", "南岐阜病院"],
+    clinic: ["ながら内科クリニック", "金華橋こどもクリニック", "駅前整形外科", "ひまわり眼科"],
+    school: ["市立金山小学校", "市立長森中学校", "県立岐阜北高校", "市立柳津小学校"],
+    community: ["日野公民館", "鏡島公民館", "三里コミュニティセンター", "芥見公民館"]
+  };
+  var counts = { hospital: 10, clinic: 14, school: 34, community: 18 };
+  Object.keys(counts).forEach(function (cat) {
+    var placed = 0, guard = 0;
+    while (placed < counts[cat] && guard < 4000) {
+      guard++;
+      var x = 60 + rnd() * 400, y = 30 + rnd() * 350;
+      var inside = boundary.isPointInFill
+        ? boundary.isPointInFill(new DOMPoint(x, y))
+        : (x > 100 && x < 440 && y > 60 && y < 330);
+      if (!inside) continue;
+      var dot = el("circle", {
+        cx: x.toFixed(1), cy: y.toFixed(1), r: cat === "hospital" ? 6 : 4.5,
+        fill: CAT[cat].color, stroke: "var(--surface)", "stroke-width": 1.5, cursor: "pointer"
+      });
+      var nm = nameStock[cat][placed % nameStock[cat].length];
+      attachTip(dot, CAT[cat].label + "：" + nm + "（モック）");
+      placed++;
+    }
+  });
+
+  /* ---- bars helper ---- */
+  function barRow(label, value, max, color, emphasize, tipText) {
+    var row = document.createElement("div");
+    row.className = "bar-row" + (emphasize ? " me" : "");
+    var pct = Math.max(2, Math.round(value / max * 100));
+    row.innerHTML =
+      '<div class="b-label">' + label + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%; background:' + color + '"></div></div>' +
+      '<div class="b-val">' + value.toLocaleString() + '</div>';
+    attachTip(row.querySelector(".bar-fill"), tipText || (label + "：" + value.toLocaleString() + " 件"));
+    return row;
+  }
+
+  /* ---- P1: category bars（岐阜市・実測） ---- */
+  var catBars = document.getElementById("catBars");
+  Object.keys(CAT).forEach(function (k) {
+    catBars.appendChild(barRow(CAT[k].label, CAT[k].n, 123, CAT[k].color, false, CAT[k].label + "：" + CAT[k].n + " 件（実測）"));
+  });
+
+  /* ---- P1: muni comparison（岐阜県・実測） ---- */
+  var gifuMunis = [
+    ["岐阜市", 247, true], ["大垣市", 96, false], ["関市", 84, false],
+    ["高山市", 69, false], ["中津川市", 66, false], ["多治見市", 62, false]
+  ];
+  var muniBars = document.getElementById("muniBars");
+  gifuMunis.forEach(function (m) {
+    muniBars.appendChild(barRow(m[0], m[1], 247, m[2] ? "var(--accent)" : "color-mix(in oklab, var(--accent) 45%, var(--surface))", m[2], m[0] + "：" + m[1] + " 件（実測）"));
+  });
+
+  /* ---- P1: facility table（岐阜市・モック名） ---- */
+  var rows = [
+    ["中央総合病院", "hospital", "amenity=hospital", "35.4232", "136.7606"],
+    ["市立金山小学校", "school", "amenity=school", "35.4198", "136.7654"],
+    ["日野公民館", "community", "amenity=community_centre", "35.4416", "136.7961"],
+    ["ながら内科クリニック", "clinic", "amenity=clinic", "35.4471", "136.7582"],
+    ["市立長森中学校", "school", "amenity=school", "35.4103", "136.7912"],
+    ["北部医療センター", "hospital", "amenity=hospital", "35.4675", "136.7548"],
+    ["鏡島公民館", "community", "amenity=community_centre", "35.4089", "136.7269"],
+    ["県立岐阜北高校", "school", "amenity=school", "35.4442", "136.7513"]
+  ];
+  var tbody = document.getElementById("tbody");
+  rows.forEach(function (r) {
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + r[0] + "</td>" +
+      '<td><span class="chip"><i style="background:' + CAT[r[1]].color + '"></i>' + CAT[r[1]].label + "</span></td>" +
+      '<td class="num">' + r[2] + "</td>" +
+      '<td class="num">' + r[3] + "</td>" +
+      '<td class="num">' + r[4] + "</td>";
+    tbody.appendChild(tr);
+  });
+
+  /* ---- P2: rankings（実測） ---- */
+  var rankGifu = document.getElementById("rankGifu");
+  [["岐阜市", 247, true], ["大垣市", 96, false], ["関市", 84, false], ["高山市", 69, false],
+   ["中津川市", 66, false], ["多治見市", 62, false], ["可児市", 57, false], ["海津市", 53, false],
+   ["郡上市", 53, false], ["各務原市", 52, false]].forEach(function (m) {
+    rankGifu.appendChild(barRow(m[0], m[1], 247, m[2] ? "var(--accent)" : "color-mix(in oklab, var(--accent) 45%, var(--surface))", m[2], m[0] + "：" + m[1] + " 件（実測）"));
+  });
+  var rankNation = document.getElementById("rankNation");
+  [["大阪市", 1734], ["横浜市", 1514], ["仙台市", 1335], ["神戸市", 990], ["名古屋市", 888]].forEach(function (m) {
+    rankNation.appendChild(barRow(m[0], m[1], 1734, "color-mix(in oklab, var(--accent) 45%, var(--surface))", false, m[0] + "：" + m[1].toLocaleString() + " 件（実測）"));
+  });
+
+  /* ---- P2: pivot heatmap（岐阜市行=実測、他=モック） ---- */
+  var pivotRows = [
+    ["岐阜市（実測）", [40, 18, 123, 40, 9, 17]],
+    ["大垣市", [12, 8, 48, 15, 4, 9]],
+    ["関市", [8, 6, 41, 18, 3, 8]],
+    ["高山市", [6, 5, 33, 14, 3, 8]],
+    ["中津川市", [5, 4, 32, 15, 2, 8]]
+  ];
+  var maxCell = 123;
+  var pivot = document.getElementById("pivot");
+  pivotRows.forEach(function (r) {
+    var tr = document.createElement("tr");
+    var cells = '<td>' + r[0] + '</td>';
+    r[1].forEach(function (v) {
+      var alpha = Math.min(0.55, v / maxCell * 0.9 + 0.04);
+      cells += '<td class="heat" style="background: color-mix(in oklab, var(--accent) ' + Math.round(alpha * 100) + '%, var(--surface))">' + v + '</td>';
+    });
+    tr.innerHTML = cells;
+    pivot.appendChild(tr);
+  });
+
+  /* ---- P3: national list（白川町の行は実測データそのまま） ---- */
+  var listRows = [
+    ["町立佐見小学校", "学校", "岐阜県", "白川町", "35.676458", "137.274215", true],
+    ["町立白川北小学校", "学校", "岐阜県", "白川町", "35.612626", "137.173078", true],
+    ["町立蘇原小学校", "学校", "岐阜県", "白川町", "35.544474", "137.262358", true],
+    ["町立黒川小学校", "学校", "岐阜県", "白川町", "35.597969", "137.323518", true],
+    ["白川町立白川小学校", "学校", "岐阜県", "白川町", "35.590945", "137.211522", true],
+    ["市立山王小学校", "学校", "愛知県", "名古屋市", "35.1358", "136.8940", false],
+    ["区立桜丘小学校", "学校", "東京都", "世田谷区", "35.6466", "139.6489", false],
+    ["市立旭小学校", "学校", "北海道", "札幌市", "43.0483", "141.3204", false]
+  ];
+  var listBody = document.getElementById("listBody");
+  listRows.forEach(function (r) {
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td>' + r[0] + (r[6] ? '' : '') + '</td>' +
+      '<td><span class="chip"><i style="background:var(--c-school)"></i>' + r[1] + '</span></td>' +
+      '<td class="num">' + r[2] + '</td>' +
+      '<td class="num">' + r[3] + '</td>' +
+      '<td class="num">' + r[4] + '</td>' +
+      '<td class="num">' + r[5] + '</td>';
+    listBody.appendChild(tr);
+  });
+})();
+</script>
