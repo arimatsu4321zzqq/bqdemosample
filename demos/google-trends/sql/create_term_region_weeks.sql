@@ -12,9 +12,9 @@
 CREATE OR REPLACE TABLE `ci-ss4-develop.demo_google_trends.jp_term_region_weeks`
 OPTIONS(description="ワード×都道府県のランクイン週数（Top25入りした週の数）。score と違い県間・ワード間の比較に使える実績指標。share=そのワードの全国ランクイン週数に占める当該県の割合（均等なら約2%）。is_local_term=計20週以上かつトップ県シェア30%以上の『地元ワード』判定（全779語中27語）。") AS
 WITH per AS (
-  SELECT term, region_name, region_code, COUNT(*) AS ranked_weeks
+  SELECT term, region_name, region_code, region_jpname, COUNT(*) AS ranked_weeks
   FROM `ci-ss4-develop.demo_google_trends.jp_region_weekly`
-  GROUP BY term, region_name, region_code
+  GROUP BY term, region_name, region_code, region_jpname
 ),
 tot AS (
   SELECT term, SUM(ranked_weeks) AS total_weeks, MAX(ranked_weeks) AS top_pref_weeks
@@ -24,6 +24,7 @@ SELECT
   p.term,                                       -- 検索ワード
   p.region_name,                                -- 都道府県名（英語表記）
   p.region_code,                                -- 地域コード（JP-xx）
+  p.region_jpname,                              -- 都道府県名（日本語。jp_region_weeklyから伝播）
   p.ranked_weeks,                               -- この県でTop25に入った週の数（定番度）
   t.total_weeks,                                -- 全国合計のランクイン週数
   ROUND(p.ranked_weeks / t.total_weeks, 3) AS share,  -- この県のシェア（均等なら≈0.02）

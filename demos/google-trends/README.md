@@ -19,14 +19,14 @@
 |---|---|
 | [`data-flow.md`](./data-flow.md) | **データ系譜**（出所→抽出→加工→成果テーブル。生データのクセと対応も） |
 | [`sql/create_region_view.sql`](./sql/create_region_view.sql) | **新設計** curated テーブル `jp_region_weekly` の作成SQL |
-| [`sql/create_term_region_weeks.sql`](./sql/create_term_region_weeks.sql) | 補助テーブル（ランクイン週数・**地元ワード判定**）の作成SQL |
+| [`sql/create_term_region_weeks.sql`](./sql/create_term_region_weeks.sql) | 補助テーブル（ランクイン週数。P2の県別チャート用。※is_local_term列は地元ワード廃止で未使用）の作成SQL |
 | [`setup.md`](./setup.md) | ゼロから手動再現する全手順（新設計ベース。認証〜BQ〜エージェント〜片付け） |
 | [`agent/`](./agent/) | エージェント定義JSON・生成スクリプト・操作コマンド集（jp_region_weekly 移行済み） |
 | [`data-dictionary.md`](./data-dictionary.md) | 元データのスキーマ辞書 |
 | [`mock/`](./mock/) | 地域ビュー ダッシュボードの**レイアウトモック**（HTML＋P1〜P3画面キャプチャ） |
 | [`looker-layout.md`](./looker-layout.md) | Looker Studio 3ページ構成のレイアウト案（設計原則・チャート定義） |
 | [`looker-setup-common.md`](./looker-setup-common.md) | Looker 手動構築の共通セットアップ（データソース2本・型/既定集計・県名/month計算フィールド） |
-| [`looker-page-P1-region.md`](./looker-page-P1-region.md) | P1 地域ビュー 手順書（顔ぶれ・時系列・地元ワード。期待値付き） |
+| [`looker-page-P1-region.md`](./looker-page-P1-region.md) | P1 地域ビュー 手順書（顔ぶれ・時系列・Top25明細の3ブロック。期待値付き） |
 | [`looker-page-P2-term.md`](./looker-page-P2-term.md) | P2 ワード深掘り 手順書（5年推移・季節性・県別週数） |
 | [`looker-page-P3-national.md`](./looker-page-P3-national.md) | P3 全国サマリ 手順書（KPI・全国Top10・県ごとの1位） |
 | [`old/`](./old/) | **旧設計の退避場所**（4ページ構成の Looker 手順書・dash_* 集計SQL・旧作業物） |

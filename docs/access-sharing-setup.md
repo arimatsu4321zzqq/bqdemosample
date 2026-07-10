@@ -21,6 +21,10 @@ BQ の会話分析（Conversational Analytics / Gemini Data Analytics）エー�
 | 3 | データ読取 | `roles/bigquery.dataViewer` | **データセット単位で付与可** | 「access this data」権限エラー |
 | 4 | クォータ/課金PJ利用 | `roles/serviceusage.serviceUsageConsumer` | プロジェクト | `x-goog-user-project` 系で拒否 |
 
+> ⚠ **レイヤ4は「必須ではない」**。`kk2119nn@gmail.com` の Data ポータル経由チャット疎通では
+> `serviceUsageConsumer` を付けずに通った（2026-07-02 実測）。利用者本人のクォータPJがクエリ実行PJと
+> 一致する経路では不要。`x-goog-user-project` 系のクォータ拒否が出たときにだけ付ければよいフォールバック扱い。
+
 > レイヤ2 `cloudaicompanion.user` は「Gemini チャットを使ってよい」能力のみで、**どのエージェントを使えるかは制御しない**。
 > 使えるエージェントはレイヤ1の付与先で決まるため、**「一方だけ使える」分離を保ったまま**付けられる。
 
@@ -52,8 +56,8 @@ BQ の会話分析（Conversational Analytics / Gemini Data Analytics）エー�
 3. 新しいプリンシパル＝ 対象メール
 4. ロールを追加:
    - **「BigQuery ジョブユーザー」**
-   - **「Service Usage コンシューマ」**
    - **「Gemini for Google Cloud ユーザー」**（＝会話作成）
+   - （必要時のみ）**「Service Usage コンシューマ」** ← 疎通では不要だった。クォータ拒否時のフォールバック
 5. 保存
 
 > ⚠ 「BigQuery データ閲覧者」を IAM 画面（②）で付けると**プロジェクト全体（全データセット）**に効く。
@@ -68,13 +72,15 @@ PROJECT=ci-ss4-develop
 EMAIL=customer@example.com
 AGENT_ID=jp_trends_demo      # 使わせたいエージェント
 
-# --- レイヤ2/3/4：プロジェクト単位 ---
+# --- レイヤ2/3：プロジェクト単位（この2つは必須） ---
 gcloud projects add-iam-policy-binding $PROJECT \
   --member="user:$EMAIL" --role="roles/cloudaicompanion.user"
 gcloud projects add-iam-policy-binding $PROJECT \
   --member="user:$EMAIL" --role="roles/bigquery.jobUser"
-gcloud projects add-iam-policy-binding $PROJECT \
-  --member="user:$EMAIL" --role="roles/serviceusage.serviceUsageConsumer"
+
+# --- レイヤ4：クォータ拒否が出たときだけ（疎通では不要だった） ---
+# gcloud projects add-iam-policy-binding $PROJECT \
+#   --member="user:$EMAIL" --role="roles/serviceusage.serviceUsageConsumer"
 
 # --- レイヤ3：データ読取をデータセット限定で ---
 bq add-iam-policy-binding \
@@ -112,7 +118,7 @@ curl -s -X POST \
 | 「エージェントが共有されましたが…会話を作成する権限がないため無効」 | `roles/cloudaicompanion.user`（レイヤ2） |
 | チャットで「perform this action」権限エラー | `roles/bigquery.jobUser`（レイヤ3） |
 | チャットで「access this data」権限エラー | `roles/bigquery.dataViewer`（レイヤ3・対象データセット） |
-| `x-goog-user-project` / クォータ拒否 | `roles/serviceusage.serviceUsageConsumer`（レイヤ4） |
+| `x-goog-user-project` / クォータ拒否 | `roles/serviceusage.serviceUsageConsumer`（レイヤ4・疎通では不要。出たときだけ付ける） |
 | 外部ドメインのメールが追加できない | 組織ポリシー `iam.allowedPolicyMemberDomains` の制約 |
 
 ---
@@ -125,4 +131,4 @@ curl -s -X POST \
   外部相当アカウントで一度実地確認すること（CIF 等のアカウント種別で Data ポータル経由が
   制限される事象の可能性があるため）。
 - 本番配布時は共有 dev プロジェクト（`ci-ss4-develop`）ではなく**会話分析用の専用プロジェクト**を推奨
-  （`jobUser`/`serviceUsageConsumer` がプロジェクト全体に効くため）。
+  （`jobUser`（＋付けるなら `serviceUsageConsumer`）がプロジェクト全体に効くため）。

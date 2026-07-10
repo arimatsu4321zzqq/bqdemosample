@@ -119,17 +119,6 @@
     background: var(--blue-soft); border-radius: 8px; padding: 9px 13px;
   }
 
-  /* duo mini bars */
-  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 720px) { .duo { grid-template-columns: 1fr; } }
-  .duo h3 { margin: 0 0 3px; font-size: 14px; font-weight: 800; }
-  .duo .sub { font-size: 12px; color: var(--ink-3); margin: 0 0 12px; }
-  .mini-row { display: grid; grid-template-columns: 1fr 110px 58px; gap: 10px; align-items: center; padding: 5px 0; }
-  .mini-row .tm { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mini-row .bar { height: 9px; }
-  .mini-row .bar i { display: block; height: 100%; border-radius: 0 3px 3px 0; min-width: 3px; }
-  .mini-row .vv { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
-
   /* pref bars */
   .where-grid { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
   @media (max-width: 720px) { .where-grid { grid-template-columns: 1fr; } }
@@ -212,21 +201,7 @@
     </div>
 
     <div class="sec">
-      <div class="sec-head"><span class="no">03</span><h2>地元ワードと急浮上</h2><span class="q">— この県ならではの語 / いま急に出てきた語</span></div>
-      <div class="duo">
-        <div class="card">
-          <h3>この県の地元ワード</h3><p class="sub">ランクイン実績がこの県に偏る語（バー=全国シェア。実測値）</p>
-          <div id="staples"></div>
-        </div>
-        <div class="card">
-          <h3>急浮上ワード</h3><p class="sub">4週間前とのスコア差が大きい順（今週）</p>
-          <div id="risers"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-head"><span class="no">04</span><h2>今週のTop25 一覧</h2><span class="q">— そのままエクスポート可能な明細</span></div>
+      <div class="sec-head"><span class="no">03</span><h2>今週のTop25 一覧</h2><span class="q">— そのままエクスポート可能な明細</span></div>
       <div class="card tablewrap">
         <table>
           <thead><tr><th>順位</th><th>ワード</th><th>ランクイン週数</th><th>今週ランクインした県数</th></tr></thead>
@@ -410,31 +385,7 @@
      { name: "介護", vals: kaigo, color: C.amber }],
     W, [[0, "2025-07"], [13, "2025-10"], [26, "2026-01"], [39, "2026-04"], [50, "2026-06"]], 280);
 
-  /* ---- P1-03: 定番 / 急浮上 ---- */
-  function miniRows(elId, rows, color, unit) {
-    var box = document.getElementById(elId);
-    var max = rows[0][1];
-    rows.forEach(function (d) {
-      var row = document.createElement("div");
-      row.className = "mini-row";
-      row.innerHTML =
-        '<div class="tm">' + d[0] + '</div>' +
-        '<div class="bar"><i style="width:' + Math.round(d[1] / max * 100) + '%; background:' + color + '"></i></div>' +
-        '<div class="vv">' + d[2] + '</div>';
-      attachTip(row.querySelector(".bar"), d[0] + "：" + d[2] + unit);
-      box.appendChild(row);
-    });
-  }
-  // 大阪の地元ワード（jp_term_region_weeks の実測値。share=全国ランクイン週数に占める大阪の割合）
-  miniRows("staples", [
-    ["大阪府警察", 68, "68%"], ["高野 線", 62, "62%"], ["大阪 警報", 41, "41%"], ["南海電鉄", 30, "30%"]
-  ], C.blue, "＝大阪のシェア（均等なら約2%。実測値）");
-  miniRows("risers", [
-    ["佐野海舟 逮捕", 100, "+100"], ["オランダ 対 モロッコ", 100, "+100"], ["クーニャ", 95, "+95"],
-    ["パラグアイ", 90, "+90"], ["天神祭 日程", 61, "+61"]
-  ], C.amber, "（4週前比・モック値）");
-
-  /* ---- P1-04: Top25 テーブル ---- */
+  /* ---- P1-03: Top25 テーブル ---- */
   var t25 = document.getElementById("top25");
   var extra = [["塩貝", 74], ["アンチェロッティ", 71], ["ビニシウス", 68], ["超ときめき宣伝部", 66],
                ["マツダ ロードスターrf", 64], ["田中碧", 62], ["堂安", 60], ["中国輸出規制リスト", 58],

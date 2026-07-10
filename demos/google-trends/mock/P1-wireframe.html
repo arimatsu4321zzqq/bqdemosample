@@ -1,0 +1,105 @@
+<title>P1 レイアウト図</title>
+<style>
+  :root{
+    --ink:#12161c; --ink2:#4d5561; --ink3:#8a919c;
+    --line:#c9cdd6; --fill:#f2f5f9; --card:#fff; --blue:#2a78d6; --blue-s:#e8f1fc;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#fff;color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;}
+  .wrap{width:900px;margin:0 auto;padding:28px 26px 34px;}
+  .ttl{font-size:20px;font-weight:800;margin:0 0 2px;}
+  .sub{font-size:12.5px;color:var(--ink3);margin:0 0 20px;}
+
+  .frame{border:1.5px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfe;}
+  /* header band */
+  .band{border:1.5px solid var(--line);border-radius:9px;background:var(--card);
+    padding:12px 16px;margin-bottom:14px;}
+  .band .h{font-size:15px;font-weight:800;}
+  .band .ctl{display:flex;gap:10px;margin-top:9px;flex-wrap:wrap;}
+  .chip{border:1.5px solid var(--line);border-radius:7px;padding:6px 12px;font-size:12.5px;
+    color:var(--ink2);background:var(--fill);}
+  .chip.week{margin-left:auto;border-style:dashed;}
+
+  .block{border:1.5px solid var(--line);border-radius:9px;background:var(--card);
+    padding:0;margin-bottom:14px;overflow:hidden;}
+  .block:last-child{margin-bottom:0;}
+  .row{display:grid;grid-template-columns:2fr 1fr;}
+  .cell{padding:15px 16px;min-height:0;}
+  .cell + .cell{border-left:1.5px dashed var(--line);}
+  .no{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;color:#fff;
+    background:var(--blue);border-radius:5px;padding:2px 7px;margin-right:9px;vertical-align:2px;}
+  .nm{font-size:15px;font-weight:800;}
+  .dsc{font-size:12px;color:var(--ink3);margin:6px 0 0;line-height:1.6;}
+  .src{display:inline-block;font-size:10.5px;color:var(--blue);background:var(--blue-s);
+    border-radius:4px;padding:1px 7px;margin-top:9px;font-weight:700;}
+  .kpi-nm{font-size:13.5px;font-weight:800;color:var(--ink2);}
+  .kpi-list{font-size:12px;color:var(--ink3);margin:7px 0 0;line-height:1.9;}
+  .full{padding:15px 16px;}
+  .tag{font-size:10.5px;font-weight:700;color:var(--ink3);border:1px solid var(--line);
+    border-radius:999px;padding:1px 9px;margin-left:8px;vertical-align:2px;}
+
+  .note{margin-top:18px;font-size:12px;color:var(--ink2);border-left:3px solid var(--blue);
+    padding:3px 0 3px 13px;line-height:1.75;}
+  .note b{color:var(--ink);}
+  .gone{margin-top:10px;font-size:11.5px;color:var(--ink3);}
+  .gone s{color:#b04a4a;}
+</style>
+
+<div class="wrap">
+  <p class="ttl">P1 地域ビュー — レイアウト図（再構成後）</p>
+  <p class="sub">キャンバス 1366×768 ／ 全チャート「週次明細」データソースのみで完結</p>
+
+  <div class="frame">
+
+    <div class="band">
+      <div class="h">🗾 検索トレンド 地域ビュー</div>
+      <div class="ctl">
+        <span class="chip">都道府県 ▼</span>
+        <span class="chip">ワード検索 🔎（含む）</span>
+        <span class="chip week">最新週チップ</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="row">
+        <div class="cell">
+          <div><span class="no">01</span><span class="nm">今週の顔ぶれ Top10</span></div>
+          <p class="dsc">表：term × MIN(latest_rank) 昇順・10行<br>バー＝ランクイン週数 ／ フィルタ is_latest_week=true</p>
+          <span class="src">週次明細</span>
+        </div>
+        <div class="cell">
+          <div class="kpi-nm">KPI スコアカード ×2</div>
+          <p class="kpi-list">・今週のランクイン数<br>・追跡週数（266週）</p>
+          <span class="src">週次明細</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="full">
+        <div><span class="no">02</span><span class="nm">いつ盛り上がった？（時系列）</span><span class="tag">フル幅</span></div>
+        <p class="dsc">期間チャート：X軸 week ／ 内訳 term ／ AVG(score)。ワード検索で1〜3語に絞って重ねる。<br>直下に読み方注記「高さ＝自己ピーク比。山の位置＝盛り上がった時期」</p>
+        <span class="src">週次明細</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="full">
+        <div><span class="no">03</span><span class="nm">今週の Top25 一覧（明細）</span><span class="tag">フル幅</span></div>
+        <p class="dsc">表：term × MIN(latest_rank) 昇順・25行＋ページング ／ 列＝ワード・ランクイン週数・今週ランクインした県数。<br>ワード検索が効く → 気になる語を検索 → 02 の時系列で見る動線</p>
+        <span class="src">週次明細</span>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="note">
+    <b>3ブロックの縦一列</b>に簡素化。県ドロップダウンで「この県の今週」を切り替え、
+    時系列で「いつ盛り上がったか」、Top25で明細を見る素直な流れ。
+  </p>
+  <p class="gone">
+    廃止：<s>「この県の地元ワード」（is_local_term・デモ造語）</s>／<s>「急浮上ワード」（4週前比の近似）</s>
+    — 全国優先・シンプル化の方針。週数集計テーブルは P2 の県別チャートでのみ使用。
+  </p>
+</div>
